@@ -1,0 +1,186 @@
+
+/* Milestone 5 — Dataset Explorer */
+.dataset-page { position: relative; }
+.dataset-toolbar { display:flex; flex-wrap:wrap; gap:12px; align-items:center; margin:18px 0 20px; }
+.dataset-search,.dataset-filter { display:flex; align-items:center; gap:9px; min-width:220px; padding:10px 12px; border:1px solid #34384c; border-radius:10px; background:#171927; color:#a8adc0; }
+.dataset-search { flex:1; }
+.dataset-search input,.dataset-toolbar select { min-width:0; width:100%; color:#f2f2f7; background:transparent; border:0; outline:0; font:inherit; }
+.dataset-toolbar select { color:#e6e7ef; background:#171927; border:1px solid #34384c; border-radius:10px; padding:10px 12px; }
+.dataset-toolbar option { background:#171927; }
+.dataset-grid { display:grid; grid-template-columns:repeat(6,minmax(0,1fr)); gap:12px; }
+.dataset-tile { min-width:0; padding:9px; text-align:left; border:1px solid #303448; border-radius:12px; background:#191c2b; color:#f4f4f8; cursor:pointer; transition:border-color .18s,transform .18s; }
+.dataset-tile:hover { border-color:#8f82ed; transform:translateY(-2px); }
+.dataset-thumb { aspect-ratio:1; display:grid; place-items:center; overflow:hidden; border-radius:8px; background:#10121c; color:#858ba0; font-size:12px; }
+.dataset-thumb img { display:block; width:100%; height:100%; object-fit:contain; image-rendering:pixelated; }
+.dataset-tile-meta { display:flex; align-items:center; justify-content:space-between; gap:5px; margin-top:9px; font-size:12px; }
+.dataset-tile-meta .state-tag { font-size:9px; padding:4px 6px; }
+.dataset-label { display:block; margin-top:5px; color:#a99df5; text-transform:capitalize; }
+.dataset-pagination { display:flex; justify-content:space-between; align-items:center; gap:12px; flex-wrap:wrap; margin-top:20px; color:#9da2b5; font-size:12px; }
+.dataset-pagination>div { display:flex; align-items:center; gap:12px; }
+.dataset-class-list { display:grid; gap:13px; }
+.dataset-class-row { display:grid; grid-template-columns:100px minmax(0,1fr) 38px; gap:12px; align-items:center; color:#c5c8d5; text-transform:capitalize; font-size:13px; }
+.dataset-class-row strong { text-align:right; color:#f4f4f8; font-variant-numeric:tabular-nums; }
+.dataset-class-track { height:9px; overflow:hidden; border-radius:99px; background:#2a2d40; }
+.dataset-class-track div { height:100%; border-radius:99px; background:linear-gradient(90deg,#8274e8,#42cbd7); }
+.dataset-modal-backdrop { position:fixed; inset:0; z-index:1000; display:grid; place-items:center; padding:20px; background:rgba(5,7,15,.78); backdrop-filter:blur(7px); }
+.dataset-modal { width:min(520px,100%); padding:20px; border:1px solid #3b3f55; border-radius:18px; background:#191c2b; box-shadow:0 24px 80px #0008; }
+.dataset-modal-head { display:flex; justify-content:space-between; align-items:flex-start; gap:16px; margin-bottom:16px; color:#f5f5fa; }
+.dataset-modal-head p { margin:5px 0 0; color:#9da2b5; font-size:13px; text-transform:capitalize; }
+.dataset-modal-image { min-height:220px; display:grid; place-items:center; overflow:hidden; border-radius:12px; background:#10121c; color:#9da2b5; }
+.dataset-modal-image img { display:block; width:min(100%,320px); aspect-ratio:1; object-fit:contain; image-rendering:pixelated; }
+.dataset-modal-actions { display:flex; justify-content:flex-end; gap:10px; margin-top:16px; }
+@media(max-width:1100px) { .dataset-grid { grid-template-columns:repeat(4,minmax(0,1fr)); } }
+@media(max-width:720px) { .dataset-grid { grid-template-columns:repeat(3,minmax(0,1fr)); gap:8px; } .dataset-toolbar>* { flex:1 1 100%; } .dataset-pagination { align-items:flex-start; } .dataset-class-row { grid-template-columns:76px minmax(0,1fr) 28px; gap:8px; } }
+@media(max-width:420px) { .dataset-grid { grid-template-columns:repeat(2,minmax(0,1fr)); } .dataset-pagination>div { width:100%; justify-content:space-between; } }
+
+/* Research Dashboard — refresh, efficiency and reproducibility */
+
+.research-heading-actions {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+.dashboard-updated {
+  margin: -12px 0 16px;
+  color: #858ba0;
+  font-size: 11px;
+  text-align: right;
+}
+
+.efficiency-selector {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 12px;
+  margin: 20px 0;
+  color: #c5c8d5;
+  font-size: 13px;
+}
+
+.efficiency-selector select {
+  padding: 9px 12px;
+  color: #f2f2f7;
+  background: #171927;
+  border: 1px solid #34384c;
+  border-radius: 9px;
+  font: inherit;
+}
+
+.efficiency-results {
+  display: grid;
+  gap: 12px;
+}
+
+.efficiency-result {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 12px;
+  padding: 15px;
+  border: 1px solid #303448;
+  border-radius: 11px;
+  background: #191c2b;
+  color: #c5c8d5;
+  font-size: 13px;
+}
+
+.efficiency-result strong {
+  color: #f4f4f8;
+  font-size: 16px;
+  font-variant-numeric: tabular-nums;
+  text-align: right;
+}
+
+.repro-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 12px;
+  margin-top: 20px;
+}
+
+.repro-grid > div {
+  display: grid;
+  gap: 8px;
+  padding: 15px;
+  border: 1px solid #303448;
+  border-radius: 11px;
+  background: #191c2b;
+}
+
+.repro-grid span,
+.seed-list > span {
+  color: #9da2b5;
+  font-size: 12px;
+}
+
+.repro-grid strong {
+  color: #f4f4f8;
+  font-size: 21px;
+  font-variant-numeric: tabular-nums;
+}
+
+.seed-list {
+  margin-top: 16px;
+  padding: 14px;
+  border-radius: 10px;
+  background: #171927;
+}
+
+.seed-list p {
+  margin: 8px 0 0;
+  color: #a99df5;
+  font-size: 13px;
+  overflow-wrap: anywhere;
+}
+
+.model-experiments-panel {
+  margin-top: 20px;
+}
+
+.model-experiment-row {
+  grid-template-columns: 1.5fr 0.5fr 1fr 1fr 0.8fr;
+  gap: 12px;
+}
+
+.model-experiment-row > span,
+.model-experiment-row > strong {
+  min-width: 0;
+  overflow-wrap: anywhere;
+}
+
+@media (max-width: 720px) {
+  .research-heading-actions {
+    width: 100%;
+    justify-content: space-between;
+  }
+
+  .dashboard-updated {
+    text-align: left;
+  }
+
+  .model-experiment-row {
+    grid-template-columns: 1fr 0.6fr;
+  }
+
+  .model-experiment-row.header {
+    display: none;
+  }
+
+  .model-experiment-row > span,
+  .model-experiment-row > strong {
+    padding: 5px 0;
+  }
+}
+
+@media (max-width: 420px) {
+  .repro-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .efficiency-result {
+    align-items: flex-start;
+    flex-direction: column;
+  }
+}

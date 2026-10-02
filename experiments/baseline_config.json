@@ -1,0 +1,15 @@
+{
+    "experiment_name": "baseline_cnn",
+    "dataset": "CIFAR-10",
+    "initial_labeled_size": 1000,
+    "validation_size": 5000,
+    "unlabeled_size": 44000,
+    "test_size": 10000,
+    "batch_size": 64,
+    "epochs": 10,
+    "learning_rate": 0.001,
+    "optimizer": "Adam",
+    "loss_function": "CrossEntropyLoss",
+    "seed": 42,
+    "device": "cpu"
+}

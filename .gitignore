@@ -1,0 +1,80 @@
+﻿# Python
+__pycache__/
+*.py[cod]
+*.pyd
+*.so
+.Python
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+.coverage
+htmlcov/
+
+# Virtual environments
+.venv/
+venv/
+env/
+ENV/
+handenv/
+
+# Environment variables and secrets
+.env
+.env.*
+!.env.example
+*.pem
+*.key
+secrets/
+secrets.json
+
+# Jupyter
+.ipynb_checkpoints/
+
+# Node / React
+node_modules/
+frontend/node_modules/
+frontend/dist/
+dist/
+build/
+.vite/
+
+# Dataset and local database
+data/raw/
+data/processed/
+data/interim/
+data/external/
+data/*.sqlite
+data/*.db
+data/*.sqlite3
+
+# Model weights and checkpoints
+*.pt
+*.pth
+*.onnx
+*.h5
+*.keras
+*.ckpt
+*.safetensors
+models/
+experiments/model_lab/checkpoints/
+
+# Local experiment logs
+runs/
+wandb/
+lightning_logs/
+.tensorboard/
+
+# OS and editor files
+.DS_Store
+Thumbs.db
+.vscode/
+.idea/
+
+# Logs and temporary files
+*.log
+*.tmp
+*.bak
+*.swp
+
+# Local development backups
+**/*_backup.*
+**/*_milestone*_backup.*

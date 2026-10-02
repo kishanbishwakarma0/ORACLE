@@ -1,0 +1,12 @@
+[
+    {
+        "strategy":"random",
+        "mean":59.6833333333,
+        "std":2.40840888
+    },
+    {
+        "strategy":"uncertainty",
+        "mean":56.6866666667,
+        "std":6.2296896659
+    }
+]

@@ -1,0 +1,12 @@
+{
+    "algorithm": "Least Confidence Uncertainty Sampling",
+    "initial_labeled_size": 1000,
+    "query_size": 500,
+    "maximum_labeled_size": 5000,
+    "epochs_per_iteration": 10,
+    "best_validation_accuracy": 62.08,
+    "final_test_loss": 1.0605,
+    "final_test_accuracy": 61.68,
+    "total_training_time_seconds": 453.5,
+    "best_model_path": "models/uncertainty_sampling_best.pth"
+}

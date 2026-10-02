@@ -1,0 +1,21 @@
+{
+    "experiment_name": "baseline_cnn",
+    "dataset": "CIFAR-10",
+    "initial_labeled_size": 1000,
+    "validation_size": 5000,
+    "unlabeled_size": 44000,
+    "test_size": 10000,
+    "batch_size": 64,
+    "epochs": 10,
+    "learning_rate": 0.001,
+    "optimizer": "Adam",
+    "loss_function": "CrossEntropyLoss",
+    "seed": 42,
+    "device": "cpu",
+    "best_epoch": 10,
+    "best_validation_accuracy": 49.1,
+    "final_test_loss": 1.5153,
+    "final_test_accuracy": 48.65,
+    "training_time_seconds": 24.96,
+    "model_path": "models\\baseline_cnn.pth"
+}

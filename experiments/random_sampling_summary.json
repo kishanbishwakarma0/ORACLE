@@ -1,0 +1,12 @@
+{
+    "algorithm": "Random Sampling",
+    "initial_labeled_size": 1000,
+    "query_size": 500,
+    "maximum_labeled_size": 5000,
+    "epochs_per_iteration": 10,
+    "best_validation_accuracy": 62.54,
+    "final_test_loss": 1.1446,
+    "final_test_accuracy": 62.47,
+    "total_training_time_seconds": 254.01,
+    "best_model_path": "models/random_sampling_best.pth"
+}

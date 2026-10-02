@@ -1,0 +1,34 @@
+{
+    "dataset": "CIFAR-10",
+    "seeds": [
+        42,
+        123,
+        2026
+    ],
+    "strategies": [
+        "random",
+        "uncertainty"
+    ],
+    "initial_labeled": 1000,
+    "validation_size": 5000,
+    "query_size": 500,
+    "max_budget": 5000,
+    "epochs": 10,
+    "batch_size": 128,
+    "learning_rate": 0.001,
+    "device": "cpu",
+    "runtime_seconds": 3995.645887851715,
+    "runtime_minutes": 66.59409813086192,
+    "test_results": [
+        {
+            "strategy": "random",
+            "mean": 59.68333333333334,
+            "std": 2.4084088800146324
+        },
+        {
+            "strategy": "uncertainty",
+            "mean": 56.68666666666667,
+            "std": 6.229689665892946
+        }
+    ]
+}
