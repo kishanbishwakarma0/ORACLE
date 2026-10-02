@@ -17,7 +17,12 @@ from pydantic import BaseModel, Field
 from backend.model_lab import model_lab
 
 
+# --------------------------------------------------
+# PATHS AND CONFIGURATION
+# --------------------------------------------------
+
 ROOT = Path(__file__).resolve().parents[1]
+
 DATA_DIR = ROOT / "data" / "raw"
 DB_PATH = ROOT / "data" / "annotations.sqlite"
 EXPERIMENTS_DIR = ROOT / "experiments"
@@ -35,18 +40,52 @@ CLASSES = [
     "truck",
 ]
 
-app = FastAPI(title="ORACLE API", version="0.3.0")
+
+# --------------------------------------------------
+# FASTAPI APPLICATION
+# --------------------------------------------------
+
+app = FastAPI(
+    title="ORACLE API",
+    version="0.3.0",
+)
+
+
+# --------------------------------------------------
+# CORS CONFIGURATION
+# --------------------------------------------------
+
+# Explicitly trusted frontend domains.
+ALLOWED_ORIGINS = [
+    "https://oracle-zeta-silk.vercel.app",
+    "https://oracle-research-git-main-civic-pulse-ai.vercel.app",
+    "http://localhost:5173",
+    "http://localhost:5174",
+    "http://localhost:5175",
+    "http://127.0.0.1:5173",
+    "http://127.0.0.1:5174",
+    "http://127.0.0.1:5175",
+]
 
 app.add_middleware(
     CORSMiddleware,
+    allow_origins=ALLOWED_ORIGINS,
+
+    # Allows Vercel preview deployments.
     allow_origin_regex=(
-        r"^https?://(localhost|127\.0\.0\.1)(:\d+)?$"
-        r"|^https://[a-zA-Z0-9-]+\.vercel\.app$"
+        r"^https://[a-zA-Z0-9-]+\.vercel\.app$"
+        r"|^https?://(localhost|127\.0\.0\.1)(:\d+)?$"
     ),
+
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
 )
+
+
+# --------------------------------------------------
+# DATASET
+# --------------------------------------------------
 
 _dataset = None
 
@@ -65,8 +104,15 @@ def get_dataset():
     return _dataset
 
 
+# --------------------------------------------------
+# DATABASE
+# --------------------------------------------------
+
 def db():
-    DB_PATH.parent.mkdir(parents=True, exist_ok=True)
+    DB_PATH.parent.mkdir(
+        parents=True,
+        exist_ok=True,
+    )
 
     conn = sqlite3.connect(DB_PATH)
     conn.row_factory = sqlite3.Row
@@ -84,8 +130,13 @@ def db():
     )
 
     conn.commit()
+
     return conn
 
+
+# --------------------------------------------------
+# EXPERIMENT METRICS
+# --------------------------------------------------
 
 def _read_csv(filename: str) -> list[dict[str, Any]]:
     path = EXPERIMENTS_DIR / filename
@@ -95,7 +146,11 @@ def _read_csv(filename: str) -> list[dict[str, Any]]:
 
     try:
         frame = pd.read_csv(path)
-        frame = frame.astype(object).where(pd.notna(frame), None)
+        frame = frame.astype(object).where(
+            pd.notna(frame),
+            None,
+        )
+
         return frame.to_dict(orient="records")
 
     except Exception as exc:
@@ -105,27 +160,55 @@ def _read_csv(filename: str) -> list[dict[str, Any]]:
         ) from exc
 
 
+# --------------------------------------------------
+# REQUEST MODELS
+# --------------------------------------------------
+
 class AnnotationIn(BaseModel):
-    image_index: int = Field(ge=0, lt=50000)
+    image_index: int = Field(
+        ge=0,
+        lt=50000,
+    )
+
     chosen_label: str
     reveal_truth: bool = False
 
 
 class TrainingConfig(BaseModel):
-    epochs: int = Field(default=5, ge=1, le=100)
-    batch_size: int = Field(default=64, ge=8, le=512)
+    epochs: int = Field(
+        default=5,
+        ge=1,
+        le=100,
+    )
+
+    batch_size: int = Field(
+        default=64,
+        ge=8,
+        le=512,
+    )
+
     learning_rate: float = Field(
         default=0.001,
         gt=0,
         le=0.1,
     )
+
     initial_labeled_size: int = Field(
         default=1000,
         ge=100,
         le=45000,
     )
-    seed: int = Field(default=42, ge=0, le=2**32 - 1)
 
+    seed: int = Field(
+        default=42,
+        ge=0,
+        le=2**32 - 1,
+    )
+
+
+# --------------------------------------------------
+# HEALTH CHECK
+# --------------------------------------------------
 
 @app.get("/api/health")
 def health():
@@ -134,6 +217,10 @@ def health():
         "service": "ORACLE API",
     }
 
+
+# --------------------------------------------------
+# DATASET SUMMARY
+# --------------------------------------------------
 
 @app.get("/api/dataset/summary")
 def summary():
@@ -145,6 +232,10 @@ def summary():
         "image_shape": [32, 32, 3],
     }
 
+
+# --------------------------------------------------
+# EXPERIMENT METRICS API
+# --------------------------------------------------
 
 @app.get("/api/experiments/metrics")
 def experiment_metrics():
@@ -173,8 +264,12 @@ def experiment_metrics():
         try:
             if path.suffix.lower() == ".csv":
                 result["files"][filename] = _read_csv(filename)
+
             else:
-                with path.open("r", encoding="utf-8") as file:
+                with path.open(
+                    "r",
+                    encoding="utf-8",
+                ) as file:
                     result["files"][filename] = json.load(file)
 
         except HTTPException:
@@ -193,12 +288,20 @@ def experiment_metrics():
     return result
 
 
+# --------------------------------------------------
+# IMAGE API
+# --------------------------------------------------
+
 @app.get("/api/images/{image_index}")
 def get_image(image_index: int):
     if image_index < 0 or image_index >= 50000:
-        raise HTTPException(404, "Image index out of range")
+        raise HTTPException(
+            404,
+            "Image index out of range",
+        )
 
     ds = get_dataset()
+
     image, _ = ds[image_index]
 
     buf = io.BytesIO()
@@ -212,11 +315,20 @@ def get_image(image_index: int):
     }
 
 
+# --------------------------------------------------
+# ANNOTATIONS API
+# --------------------------------------------------
+
 @app.get("/api/annotations")
 def list_annotations():
     with db() as conn:
         rows = conn.execute(
-            "SELECT * FROM annotations ORDER BY id DESC LIMIT 500"
+            """
+            SELECT *
+            FROM annotations
+            ORDER BY id DESC
+            LIMIT 500
+            """
         ).fetchall()
 
         total = conn.execute(
@@ -232,9 +344,13 @@ def list_annotations():
 @app.post("/api/annotations")
 def save_annotation(payload: AnnotationIn):
     if payload.chosen_label not in CLASSES:
-        raise HTTPException(400, "Unknown class label")
+        raise HTTPException(
+            400,
+            "Unknown class label",
+        )
 
     ds = get_dataset()
+
     _, true_index = ds[payload.image_index]
 
     truth = (
@@ -281,14 +397,20 @@ def save_annotation(payload: AnnotationIn):
 def delete_annotation(image_index: int):
     with db() as conn:
         cur = conn.execute(
-            "DELETE FROM annotations WHERE image_index = ?",
+            """
+            DELETE FROM annotations
+            WHERE image_index = ?
+            """,
             (image_index,),
         )
 
         conn.commit()
 
     if cur.rowcount == 0:
-        raise HTTPException(404, "Annotation not found")
+        raise HTTPException(
+            404,
+            "Annotation not found",
+        )
 
     return {
         "deleted": True,
@@ -300,7 +422,10 @@ def delete_annotation(image_index: int):
 # MODEL LAB API
 # --------------------------------------------------
 
-@app.post("/api/model-lab/train", status_code=202)
+@app.post(
+    "/api/model-lab/train",
+    status_code=202,
+)
 def start_model_training(payload: TrainingConfig):
     try:
         return model_lab.start_training(
@@ -333,9 +458,15 @@ def model_lab_experiments():
     }
 
 
-@app.get("/api/model-lab/experiments/{experiment_id}")
-def model_lab_experiment_detail(experiment_id: str):
-    experiment = model_lab.get_experiment(experiment_id)
+@app.get(
+    "/api/model-lab/experiments/{experiment_id}"
+)
+def model_lab_experiment_detail(
+    experiment_id: str,
+):
+    experiment = model_lab.get_experiment(
+        experiment_id
+    )
 
     if experiment is None:
         raise HTTPException(
