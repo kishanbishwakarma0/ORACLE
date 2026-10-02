@@ -1,8 +1,12 @@
-
 # ORACLE
+
 ### Open Research for Active Learning and Continuous Evaluation
 
-**An experimental framework for evaluating whether intelligent sample selection can reduce annotation effort while maintaining model performance.**
+**An interactive research platform for studying how intelligent sample selection affects annotation effort and model performance.**
+
+ORACLE combines an active learning research pipeline with a web-based interface for dataset exploration, annotation, experiment tracking, and model evaluation.
+
+It provides a reproducible environment for comparing random and uncertainty-based sample selection strategies on CIFAR-10.
 
 ---
 
@@ -10,50 +14,60 @@
 
 Machine learning models often require large amounts of labeled data. However, manually annotating data can be expensive, time-consuming, and difficult to scale.
 
-**Active Learning** addresses this challenge by allowing a model to select the most informative unlabeled samples for annotation.
+**Active Learning** addresses this challenge by allowing a model to select informative unlabeled samples for annotation.
 
-ORACLE is a reproducible experimental framework designed to compare two data-selection strategies:
+ORACLE investigates this problem through two sampling strategies:
 
 - **Random Sampling:** Selects unlabeled samples randomly.
-- **Uncertainty Sampling:** Selects samples for which the model has the lowest prediction confidence.
+- **Uncertainty Sampling:** Prioritizes samples for which the model has low prediction confidence.
 
-The project evaluates these strategies on CIFAR-10 using a CNN classifier, iterative annotation, repeated experiments, and quantitative analysis.
+The platform combines:
 
-The primary objective is to understand how annotation budget influences model performance and whether uncertainty-based selection provides measurable benefits over random selection.
+- A modular Python research pipeline.
+- A CNN-based image classification model.
+- A simulated annotation oracle.
+- Persistent annotation storage.
+- A FastAPI backend.
+- A React-based interactive frontend.
+- Experimental metrics and visualizations.
+- Model training and evaluation tools.
 
----
-
-## Research Question
-
-> Can an active learning strategy achieve comparable classification performance with fewer labeled samples than random sampling?
-
-To investigate this question, ORACLE:
-
-1. Establishes an initial labeled dataset.
-2. Maintains a separate unlabeled pool.
-3. Trains a CNN classifier.
-4. Selects new samples using different sampling strategies.
-5. Simulates annotation through an annotation oracle.
-6. Retrains the model at increasing annotation budgets.
-7. Evaluates performance using a separate validation and test dataset.
-8. Repeats experiments across multiple random seeds.
+The objective is to investigate whether intelligent sample selection can improve learning efficiency compared with random selection, while transparently reporting experimental results and limitations.
 
 ---
 
 ## Key Features
 
-- CIFAR-10 dataset integration
-- Reproducible dataset splitting
-- CNN-based image classification
-- Random and uncertainty-based sample selection
-- Simulated human annotation
-- Annotation history and duplicate protection
-- Iterative model retraining
-- Multi-seed experimental evaluation
-- Accuracy tracking across annotation budgets
-- CSV and JSON result exports
-- High-resolution experimental visualizations
-- Modular and extensible architecture
+### Research and Active Learning
+
+- CIFAR-10 dataset integration.
+- Reproducible dataset splitting.
+- Random and uncertainty-based sampling.
+- Simulated human annotation.
+- Iterative model retraining.
+- Multi-seed experimental evaluation.
+- Annotation-budget-based learning curves.
+- CSV and JSON result exports.
+
+### Interactive Application
+
+- Research Dashboard for experiment analysis.
+- Dataset Explorer for browsing CIFAR-10 images.
+- Annotation Studio for selecting and saving labels.
+- Model Lab for configuring and running training experiments.
+- Experiment history and detailed evaluation reports.
+- Per-class precision, recall, and F1-score.
+- Confusion matrix visualization.
+- Persistent annotation records using SQLite.
+
+### Engineering
+
+- Modular project structure.
+- FastAPI backend.
+- React and Vite frontend.
+- Reproducible experiment configuration.
+- Separation of training, validation, and test data.
+- Error handling and API health checks.
 
 ---
 
@@ -68,24 +82,60 @@ flowchart TD
 
     C --> F["CNN Training"]
     F --> G["Model Predictions"]
-
     D --> H["Sampling Strategy"]
     G --> H
 
     H --> I["Selected Samples"]
     I --> J["Annotation Oracle"]
     J --> K["Label Store"]
-
     K --> L["Updated Labeled Dataset"]
     L --> F
 
     F --> M["Validation Evaluation"]
     M --> N["Experiment Tracking"]
     N --> O["Learning Curves and Reports"]
-
     F --> P["Final Test Evaluation"]
     P --> O
+
+    subgraph Application["Interactive Application"]
+        Q["React Frontend"]
+        R["FastAPI Backend"]
+        S["SQLite Annotation Store"]
+        T["Model Lab"]
+        U["Research Dashboard"]
+        V["Dataset Explorer"]
+        W["Annotation Studio"]
+
+        Q <--> R
+        R <--> S
+        R --> T
+        Q --> U
+        Q --> V
+        Q --> W
+    end
+
+    O --> U
+    B --> V
+    W --> S
 ```
+
+---
+
+## Technology Stack
+
+| Layer | Technologies |
+|---|---|
+| Programming language | Python, JavaScript |
+| Machine learning | PyTorch, Torchvision |
+| Data processing | NumPy, Pandas |
+| Evaluation | scikit-learn |
+| Visualization | Matplotlib, Recharts |
+| Backend | FastAPI, Uvicorn |
+| Frontend | React 19, Vite |
+| UI and animation | Framer Motion, Lucide React |
+| Persistent storage | SQLite |
+| Dataset | CIFAR-10 |
+| Version control | Git, GitHub |
 
 ---
 
@@ -127,25 +177,27 @@ The original training dataset is divided into three subsets:
 | Validation set | 5,000 | Model evaluation during training |
 | Official test set | 10,000 | Final performance evaluation |
 
-The test set remains separate from the training and sample-selection process.
+The test set remains separate from training and sample selection.
 
 Unlabeled samples are presented to the sampling strategy without exposing their labels through the sampler interface. Labels are revealed only after samples are selected by the annotation oracle.
 
 ---
 
-## Methodology
+## Research Methodology
 
 ### 1. Random Sampling
 
 Random Sampling selects samples uniformly from the available unlabeled pool without replacement.
 
-**Advantages:**
-- Simple implementation
-- Low selection overhead
-- Useful experimental baseline
+**Advantages**
 
-**Limitation:**
-- Does not consider model uncertainty or sample informativeness.
+- Simple implementation.
+- Low selection overhead.
+- Useful experimental baseline.
+
+**Limitation**
+
+It does not consider model uncertainty or sample informativeness.
 
 ### 2. Uncertainty Sampling
 
@@ -167,18 +219,18 @@ A higher uncertainty score indicates lower prediction confidence.
 
 The samples with the highest uncertainty scores are selected for annotation.
 
-**Advantages:**
+**Advantages**
+
 - Uses model predictions to guide sample selection.
 - Prioritizes uncertain examples.
 - Provides a practical baseline for active learning research.
 
-**Limitation:**
+**Limitations**
+
 - Uncertain predictions are not necessarily the most informative.
 - Results can depend on model quality, initialization, and training stability.
 
 ### 3. Iterative Learning Process
-
-The experiment follows this cycle:
 
 1. Train the CNN on currently labeled samples.
 2. Evaluate validation accuracy.
@@ -189,7 +241,9 @@ The experiment follows this cycle:
 7. Train a fresh model at the new budget.
 8. Repeat until the maximum budget is reached.
 
-### 4. Experimental Configuration
+---
+
+## Experimental Configuration
 
 | Parameter | Value |
 |---|---|
@@ -217,14 +271,14 @@ ORACLE uses a custom convolutional neural network (CNN) for CIFAR-10 classificat
 
 The baseline architecture consists of:
 
-- Three convolutional blocks
-- Convolutional layers with 32, 64, and 128 channels
-- Batch normalization
-- ReLU activation
-- Max pooling
-- Fully connected layer with 256 units
-- Dropout with probability 0.3
-- Final classification layer with 10 outputs
+- Three convolutional blocks.
+- Convolutional layers with 32, 64, and 128 channels.
+- Batch normalization.
+- ReLU activation.
+- Max pooling.
+- Fully connected layer with 256 units.
+- Dropout with probability 0.3.
+- Final classification layer with 10 outputs.
 
 The same model architecture is used for both sampling strategies to support a controlled comparison.
 
@@ -241,7 +295,7 @@ The following results were obtained from three random seeds using a maximum anno
 | Random Sampling | 59.68% | 2.41 |
 | Uncertainty Sampling | 56.69% | 6.23 |
 
-**Interpretation:**
+### Interpretation
 
 In the current experiment, Random Sampling achieved a higher mean final test accuracy than Uncertainty Sampling.
 
@@ -289,104 +343,260 @@ Change in validation accuracy as the annotation budget increases.
 
 ---
 
+## Interactive Application
+
+### Research Dashboard
+
+The Research Dashboard brings experimental results together in one place.
+
+It provides:
+
+- Experimental overview.
+- Learning curves.
+- Annotation efficiency analysis.
+- Reproducibility information.
+- Strategy comparison.
+- Model Lab experiment history.
+
+### Dataset Explorer
+
+The Dataset Explorer allows users to browse CIFAR-10 images and inspect dataset information.
+
+Features include:
+
+- Image gallery.
+- Dataset summary.
+- Image retrieval through the backend API.
+- Annotation-related exploration.
+
+### Annotation Studio
+
+The Annotation Studio provides an interface for recording annotation decisions.
+
+Features include:
+
+- Image inspection.
+- Class selection.
+- Persistent annotation records.
+- Annotation history.
+- Duplicate protection.
+
+### Model Lab
+
+The Model Lab allows users to configure and execute training experiments.
+
+Features include:
+
+- Configurable training parameters.
+- Background training.
+- Training progress and status.
+- Training and validation loss curves.
+- Accuracy tracking.
+- Experiment history.
+- Best-checkpoint evaluation.
+- Per-class classification reports.
+- Confusion matrix visualization.
+
+Model Lab evaluation reports include test accuracy, macro and weighted precision, recall, F1-score, and per-class support.
+
+---
+
 ## Project Structure
 
 ```text
 ORACLE/
 │
-├── data/
-│   └── raw/
+├── backend/
+│   ├── main.py
+│   ├── model_lab.py
+│   └── README.md
+│
+├── frontend/
+│   ├── public/
+│   ├── src/
+│   │   ├── App.jsx
+│   │   ├── App.css
+│   │   ├── ModelLab.jsx
+│   │   ├── dataset-explorer.css
+│   │   ├── model-lab.css
+│   │   ├── index.css
+│   │   └── main.jsx
+│   ├── package.json
+│   └── vite.config.js
+│
+├── src/
+│   ├── active_learning/
+│   │   ├── annotation_oracle.py
+│   │   ├── label_store.py
+│   │   ├── labeled_dataset.py
+│   │   ├── random_sampler.py
+│   │   └── uncertainty_sampler.py
+│   │
+│   ├── data/
+│   │   ├── dataset.py
+│   │   └── unlabeled_dataset.py
+│   │
+│   └── models/
+│       └── cnn.py
 │
 ├── experiments/
 │   ├── plots/
-│   │   ├── learning_curves.png
-│   │   ├── final_test_accuracy.png
-│   │   ├── annotation_efficiency.png
-│   │   ├── multi_seed_learning_curve.png
-│   │   └── strategy_comparison.png
-│   │
+│   ├── model_lab/
 │   ├── multi_seed_comparison.py
+│   ├── compare_strategies.py
 │   ├── plot_results.py
 │   ├── multi_seed_metrics.csv
 │   ├── multi_seed_aggregate.csv
 │   ├── multi_seed_test_summary.json
 │   └── multi_seed_summary.json
 │
-├── models/
-│   ├── baseline_cnn.pth
-│   ├── random_seed_42_final.pth
-│   ├── random_seed_123_final.pth
-│   ├── random_seed_2026_final.pth
-│   ├── uncertainty_seed_42_final.pth
-│   ├── uncertainty_seed_123_final.pth
-│   └── uncertainty_seed_2026_final.pth
-│
-├── src/
-│   ├── data/
-│   │   ├── dataset.py
-│   │   └── unlabeled_dataset.py
-│   │
-│   ├── models/
-│   │   └── cnn.py
-│   │
-│   └── active_learning/
-│       ├── random_sampler.py
-│       ├── uncertainty_sampler.py
-│       ├── annotation_oracle.py
-│       ├── label_store.py
-│       └── labeled_dataset.py
-│
 ├── tests/
 │
-├── requirements.txt
+├── app.py
+├── train_baseline.py
+├── test_dataset.py
 ├── README.md
 └── .gitignore
 ```
 
+Dataset files, local SQLite databases, virtual environments, and model checkpoints are excluded from version control.
+
 ---
 
-## Installation
+## Installation and Setup
 
 ### Prerequisites
 
-- Python 3.10 or later, compatible with the installed PyTorch and torchvision versions
-- Git
-- pip
+- Python 3.10 or later, compatible with the installed PyTorch and Torchvision versions.
+- Node.js and npm.
+- Git.
+- pip.
 
 ### 1. Clone the Repository
 
-```bash
-git clone <YOUR_GITHUB_REPOSITORY_URL>
+```powershell
+git clone https://github.com/kishanbishwakarma0/ORACLE.git
 cd ORACLE
 ```
 
-Replace the placeholder with the actual GitHub repository URL.
-
-### 2. Create a Virtual Environment
+### 2. Create a Python Virtual Environment
 
 Windows PowerShell:
 
 ```powershell
 python -m venv .venv
-.venv\Scripts\Activate.ps1
+.\.venv\Scripts\Activate.ps1
 ```
 
-### 3. Install Dependencies
+### 3. Install Python Dependencies
 
-```bash
+Install a compatible PyTorch and Torchvision build using the official PyTorch installation selector.
+
+Then install the remaining dependencies:
+
+```powershell
 python -m pip install --upgrade pip
-pip install -r requirements.txt
+
+pip install fastapi uvicorn pillow numpy pandas matplotlib scikit-learn tqdm
+```
+
+Ensure that the installed environment can import `torch` and `torchvision`.
+
+### 4. Install Frontend Dependencies
+
+Open a new terminal and navigate to the frontend directory:
+
+```powershell
+cd frontend
+npm install
 ```
 
 ---
 
-## Running the Experiments
+## Running the Application
+
+ORACLE uses separate backend and frontend development servers.
+
+### Start the Backend
+
+From the project root:
+
+```powershell
+.\.venv\Scripts\Activate.ps1
+
+python -m uvicorn backend.main:app --reload --host 127.0.0.1 --port 8000
+```
+
+Backend address:
+
+```text
+http://127.0.0.1:8000
+```
+
+Interactive API documentation:
+
+[http://127.0.0.1:8000/docs](http://127.0.0.1:8000/docs)
+
+The first dataset request may download CIFAR-10.
+
+### Start the Frontend
+
+Open another terminal:
+
+```powershell
+cd frontend
+npm run dev
+```
+
+Vite will display the local frontend address in the terminal, typically:
+
+```text
+http://localhost:5173
+```
+
+If the default port is already in use, Vite may select another available port.
+
+The frontend uses the local backend by default. To configure a different backend URL, set the `VITE_API_URL` environment variable before starting the frontend.
+
+---
+
+## API Endpoints
+
+| Method | Endpoint | Description |
+|---|---|---|
+| GET | `/api/health` | API health |
+| GET | `/api/dataset/summary` | Dataset metadata |
+| GET | `/api/images/{image_index}` | Retrieve an image without exposing its label |
+| GET | `/api/annotations` | Retrieve saved annotations |
+| POST | `/api/annotations` | Save a chosen class |
+| DELETE | `/api/annotations/{image_index}` | Remove an annotation |
+| GET | `/api/experiments/metrics` | Retrieve experiment metrics and artifact availability |
+| POST | `/api/model-lab/train` | Start a training experiment |
+| GET | `/api/model-lab/status` | Retrieve current training status |
+| GET | `/api/model-lab/experiments` | List saved experiments |
+| GET | `/api/model-lab/experiments/{experiment_id}` | Retrieve experiment details and evaluation |
+
+Annotation records are stored locally in:
+
+```text
+data/annotations.sqlite
+```
+
+Model Lab history and checkpoints are stored under:
+
+```text
+experiments/model_lab/
+```
+
+---
+
+## Running the Research Experiments
 
 ### Run Multi-Seed Comparison
 
 From the project root:
 
-```bash
+```powershell
 python -m experiments.multi_seed_comparison
 ```
 
@@ -398,11 +608,11 @@ This executes the configured experiments and saves metrics, summaries, and final
 
 After experiment results are available:
 
-```bash
+```powershell
 python -m experiments.plot_results
 ```
 
-The generated figures are saved in:
+Generated figures are saved in:
 
 ```text
 experiments/plots/
@@ -416,23 +626,25 @@ The visualization script reads existing results and does not retrain the models.
 
 Run the active learning pipeline tests from the project root:
 
-```bash
+```powershell
 python -m tests.test_unlabeled_dataset
+
 python -m tests.test_uncertainty_sampler
+
 python -m tests.test_active_learning_pipeline
 ```
 
 The tests verify:
 
-- Image-only access to unlabeled samples
-- Original index mapping
-- DataLoader compatibility
-- Uncertainty ranking
-- Sampling pool updates
-- Invalid query handling
-- Annotation tracking
-- Label storage
-- End-to-end pipeline integration
+- Image-only access to unlabeled samples.
+- Original index mapping.
+- DataLoader compatibility.
+- Uncertainty ranking.
+- Sampling pool updates.
+- Invalid query handling.
+- Annotation tracking.
+- Label storage.
+- End-to-end pipeline integration.
 
 ---
 
@@ -442,9 +654,9 @@ ORACLE uses fixed random seeds to support reproducible experimentation.
 
 The current experiment uses:
 
-- Seed 42
-- Seed 123
-- Seed 2026
+- Seed 42.
+- Seed 123.
+- Seed 2026.
 
 Results are exported to CSV and JSON files to support further analysis.
 
@@ -474,17 +686,14 @@ These limitations provide opportunities for future investigation.
 
 Potential extensions include:
 
-- Additional active learning strategies such as entropy sampling and margin sampling
-- Larger multi-seed experiments
-- Confidence calibration
-- Class distribution and diversity analysis
-- Annotation cost tracking
-- Model inference and training time comparison
-- Interactive human annotation interface
-- Experiment dashboard
-- Backend and database integration
-- Reproducible deployment
-- Evaluation on additional datasets
+- Additional active learning strategies such as entropy sampling and margin sampling.
+- Larger multi-seed experiments.
+- Confidence calibration.
+- Class distribution and diversity analysis.
+- Annotation cost tracking.
+- Model inference and training time comparison.
+- Evaluation on additional datasets.
+- Further improvements to reproducibility and deployment.
 
 ---
 
@@ -500,13 +709,15 @@ The current findings also demonstrate why active learning strategies should be e
 
 ## Acknowledgements
 
-- CIFAR-10 dataset
-- PyTorch
-- Torchvision
-- NumPy
-- Pandas
-- Matplotlib
-- scikit-learn
+- CIFAR-10 dataset.
+- PyTorch.
+- Torchvision.
+- NumPy.
+- Pandas.
+- Matplotlib.
+- scikit-learn.
+- FastAPI.
+- React.
 
 ---
 
@@ -516,4 +727,6 @@ The current findings also demonstrate why active learning strategies should be e
 
 B.Tech — Computer Science and Engineering (AI & ML)
 
-ORACLE — Open Research for Active Learning and Continuous Evaluation
+GitHub: [@kishanbishwakarma0](https://github.com/kishanbishwakarma0)
+
+Project: [ORACLE](https://github.com/kishanbishwakarma0/ORACLE)
